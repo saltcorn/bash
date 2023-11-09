@@ -102,24 +102,14 @@ module.exports = {
 
             break;
         }
-        console.log({
-          script_source,
-          code,
-          jscode,
-          code_field,
-          exitcode_field,
-          stdout_field,
-          stderr_field,
-          code_to_run,
-        });
+
         const eres = await exec(code_to_run);
         if (row && (exitcode_field || stdout_field || stderr_field)) {
           const upd = {};
           if (exitcode_field) upd[exitcode_field] = eres.code || 0;
           if (stdout_field) upd[stdout_field] = eres.stdout || "";
           if (stderr_field) upd[stderr_field] = eres.stderr || "";
-          console.log(upd);
-          console.log(await table.updateRow(upd, row.id));
+          await table.updateRow(upd, row.id);
         }
       },
     },
