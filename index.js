@@ -46,21 +46,21 @@ module.exports = {
             },
             {
               name: "exitcode_field",
-              label: "stdout field",
-              input_type: "select",
-              options: exitcode_field_opts,
+              label: "Exit code field",
+              type: "String",
+              attributes: { options: exitcode_field_opts },
             },
             {
               name: "stdout_field",
               label: "stdout field",
-              input_type: "select",
-              options: str_field_opts,
+              type: "String",
+              attributes: { options: str_field_opts },
             },
             {
               name: "stderr_field",
               label: "stderr field",
-              input_type: "select",
-              options: str_field_opts,
+              type: "String",
+              attributes: { options: str_field_opts },
             },
           ];
         } else
@@ -89,6 +89,7 @@ module.exports = {
         },
       }) => {
         let code_to_run = "";
+
         switch (script_source) {
           case "Fixed":
             code_to_run = code;
@@ -101,13 +102,24 @@ module.exports = {
 
             break;
         }
+        console.log({
+          script_source,
+          code,
+          jscode,
+          code_field,
+          exitcode_field,
+          stdout_field,
+          stderr_field,
+          code_to_run,
+        });
         const eres = await exec(code_to_run);
         if (row && (exitcode_field || stdout_field || stderr_field)) {
           const upd = {};
           if (exitcode_field) upd[exitcode_field] = eres.code || 0;
           if (stdout_field) upd[stdout_field] = eres.stdout || "";
           if (stderr_field) upd[stderr_field] = eres.stderr || "";
-          await table.updateRow(upd, row.id);
+          console.log(upd);
+          console.log(await table.updateRow(upd, row.id));
         }
       },
     },
