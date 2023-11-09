@@ -1,0 +1,32 @@
+{
+  "name": "@saltcorn/bash",
+  "version": "0.2.0",
+  "description": "Run bash actions in Saltcorn",
+  "main": "index.js",
+  "dependencies": {
+    "@saltcorn/markup": "^0.5.6",
+    "@saltcorn/data": "^0.5.6"
+  },
+  "author": "Tom Nielsen",
+  "license": "MIT",
+  "repository": "github:saltcorn/bash",
+  "publishConfig": {
+    "access": "public"
+  },
+  "eslintConfig": {
+    "extends": "eslint:recommended",
+    "parserOptions": {
+      "ecmaVersion": 2020
+    },
+    "env": {
+      "node": true,
+      "es6": true
+    },
+    "rules": {
+      "no-unused-vars": "off",
+      "no-case-declarations": "off",
+      "no-empty": "warn",
+      "no-fallthrough": "warn"
+    }
+  }
+}
