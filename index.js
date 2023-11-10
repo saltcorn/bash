@@ -51,14 +51,14 @@ module.exports = {
               options: str_field_opts,
               showIf: { script_source: "Field" },
             },
-            {
+            /*{
               name: "jscode",
               label: "Script-generating code",
               sublabel: `JavaScript code that returns a script. Example: <code>return \`ls \${dir}\`</code>`,
               input_type: "code",
               attributes: { mode: "application/javascript" },
               showIf: { script_source: "Meta" },
-            },
+            },*/
             {
               name: "exitcode_field",
               label: "Exit code field",
