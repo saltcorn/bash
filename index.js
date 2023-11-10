@@ -2,6 +2,10 @@ const util = require("util");
 const exec = util.promisify(require("child_process").exec);
 const Table = require("@saltcorn/data/models/table");
 const os = require("os");
+const fs = require("fs").promises;
+
+const { file } = require("tmp-promise");
+
 module.exports = {
   sc_plugin_api_version: 1,
   actions: {
@@ -118,6 +122,7 @@ module.exports = {
 
             break;
         }
+        code_to_run = code_to_run.replace(/\r\n/g, "\n");
         const rowEnv = {};
         Object.entries(row || {}).forEach(([k, v]) => {
           if (v.toString()) rowEnv[`ROW_${k.toUpperCase()}`] = v.toString();
@@ -126,13 +131,17 @@ module.exports = {
           rowEnv[`SC_USER_ID`] = req.user.id;
           rowEnv[`SC_USER_ROLE`] = req.user.role_id;
         }
-        const eres = await exec(code_to_run, {
+        const { fd, path, cleanup } = await file();
+        await fs.writeFile(path, code_to_run);
+
+        const eres = await exec(`bash ${path}`, {
           cwd: cwd || os.homedir(),
           env: {
             ...process.env,
             ...rowEnv,
           },
         });
+        await cleanup();
         if (table && row && (exitcode_field || stdout_field || stderr_field)) {
           const upd = {};
           if (exitcode_field) upd[exitcode_field] = eres.code || 0;
