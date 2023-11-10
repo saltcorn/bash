@@ -1,11 +1,19 @@
 const util = require("util");
 const exec = util.promisify(require("child_process").exec);
-
+const Table = require("@saltcorn/data/models/table");
+const os = require("os");
 module.exports = {
   sc_plugin_api_version: 1,
   actions: {
     run_bash_script: {
       configFields: async ({ table }) => {
+        const commonFields = [
+          {
+            name: "cwd",
+            label: "Working directory",
+            type: "String",
+          },
+        ];
         if (table) {
           const fields = table.getFields();
           const str_field_opts = fields
@@ -14,6 +22,7 @@ module.exports = {
           const exitcode_field_opts = fields
             .filter((f) => f.type && f.type.name === "Integer")
             .map((f) => f.name);
+
           return [
             {
               name: "script_source",
@@ -27,6 +36,8 @@ module.exports = {
               label: "Script",
               input_type: "code",
               attributes: { mode: "text/x-sh" },
+              sublabel:
+                "Row is <code>ROW_VARNAME</code>. If row is <code>{age:35}</code> then <code>ROW_AGE=35</code>",
               showIf: { script_source: "Fixed" },
             },
             {
@@ -62,15 +73,19 @@ module.exports = {
               type: "String",
               attributes: { options: str_field_opts },
             },
+            ...commonFields,
           ];
         } else
           return [
             {
               name: "code",
               label: "Code",
+              sublabel:
+                "Row is <code>ROW_VARNAME</code>. If row is <code>{age:35}</code> then <code>ROW_AGE=35</code>",
               input_type: "code",
               attributes: { mode: "text/x-sh" },
             },
+            ...commonFields,
           ];
       },
       run: async ({
@@ -86,6 +101,7 @@ module.exports = {
           exitcode_field,
           stdout_field,
           stderr_field,
+          cwd,
         },
       }) => {
         let code_to_run = "";
@@ -102,9 +118,22 @@ module.exports = {
 
             break;
         }
-
-        const eres = await exec(code_to_run);
-        if (row && (exitcode_field || stdout_field || stderr_field)) {
+        const rowEnv = {};
+        Object.entries(row || {}).forEach(([k, v]) => {
+          if (v.toString()) rowEnv[`ROW_${k.toUpperCase()}`] = v.toString();
+        });
+        if (req.user) {
+          rowEnv[`SC_USER_ID`] = req.user.id;
+          rowEnv[`SC_USER_ROLE`] = req.user.role_id;
+        }
+        const eres = await exec(code_to_run, {
+          cwd: cwd || os.homedir(),
+          env: {
+            ...process.env,
+            ...rowEnv,
+          },
+        });
+        if (table && row && (exitcode_field || stdout_field || stderr_field)) {
           const upd = {};
           if (exitcode_field) upd[exitcode_field] = eres.code || 0;
           if (stdout_field) upd[stdout_field] = eres.stdout || "";
