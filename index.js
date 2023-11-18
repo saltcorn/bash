@@ -41,7 +41,7 @@ module.exports = {
               input_type: "code",
               attributes: { mode: "text/x-sh" },
               sublabel:
-                "Row is <code>ROW_VARNAME</code>. If row is <code>{age:35}</code> then <code>ROW_AGE=35</code>",
+                "Row is <code>ROW_VARNAME</code>. If row is <code>{age:35}</code> then <code>ROW_AGE=35</code>. Use shebang for shell other than bash.",
               showIf: { script_source: "Fixed" },
             },
             {
@@ -85,7 +85,7 @@ module.exports = {
               name: "code",
               label: "Code",
               sublabel:
-                "Row is <code>ROW_VARNAME</code>. If row is <code>{age:35}</code> then <code>ROW_AGE=35</code>",
+                "Row is <code>ROW_VARNAME</code> variable names. If row is <code>{age:35}</code> then <code>ROW_AGE=35</code>. Use shebang for shell other than bash.",
               input_type: "code",
               attributes: { mode: "text/x-sh" },
             },
@@ -133,8 +133,11 @@ module.exports = {
         }
         const { fd, path, cleanup } = await file();
         await fs.writeFile(path, code_to_run);
-
-        const eres = await exec(`bash ${path}`, {
+        let cmd = "bash";
+        if (code_to_run.slice(0, 2) == "#!") {
+          cmd = code_to_run.split("\n")[0].slice(2);
+        }
+        const eres = await exec(`${cmd} ${path}`, {
           cwd: cwd || os.homedir(),
           env: {
             ...process.env,
