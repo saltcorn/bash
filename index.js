@@ -125,7 +125,8 @@ module.exports = {
         code_to_run = code_to_run.replace(/\r\n/g, "\n");
         const rowEnv = {};
         Object.entries(row || {}).forEach(([k, v]) => {
-          if (v.toString()) rowEnv[`ROW_${k.toUpperCase()}`] = v.toString();
+          if (v?.toString && v.toString())
+            rowEnv[`ROW_${k.toUpperCase()}`] = v.toString();
         });
         if (req.user) {
           rowEnv[`SC_USER_ID`] = req.user.id;
