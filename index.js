@@ -97,6 +97,7 @@ module.exports = {
         referrer,
         req,
         table,
+        user,
         configuration: {
           script_source,
           code,
@@ -128,9 +129,10 @@ module.exports = {
           if (v?.toString && v.toString())
             rowEnv[`ROW_${k.toUpperCase()}`] = v.toString();
         });
-        if (req.user) {
-          rowEnv[`SC_USER_ID`] = req.user.id;
-          rowEnv[`SC_USER_ROLE`] = req.user.role_id;
+        const u = user || req?.user;
+        if (u) {
+          rowEnv[`SC_USER_ID`] = u.id;
+          rowEnv[`SC_USER_ROLE`] = u.role_id;
         }
         const { fd, path, cleanup } = await file();
         await fs.writeFile(path, code_to_run);
