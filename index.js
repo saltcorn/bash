@@ -10,6 +10,7 @@ module.exports = {
   sc_plugin_api_version: 1,
   actions: {
     run_bash_script: {
+      namespace: "Code",
       configFields: async ({ table }) => {
         const commonFields = [
           {
