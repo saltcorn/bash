@@ -156,6 +156,11 @@ module.exports = {
           if (stderr_field) upd[stderr_field] = eres.stderr || "";
           await table.updateRow(upd, row.id);
         }
+        const data = {};
+        data.exitcode = eres.code || 0;
+        data.stdout = eres.stdout || "";
+        data.stderr = eres.stderr || "";
+        return data;
       },
     },
   },

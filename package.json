@@ -1,6 +1,6 @@
 {
   "name": "@saltcorn/bash",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Run bash actions in Saltcorn",
   "main": "index.js",
   "dependencies": {
