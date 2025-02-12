@@ -1,8 +1,10 @@
 const util = require("util");
 const exec = util.promisify(require("child_process").exec);
 const Table = require("@saltcorn/data/models/table");
+const db = require("@saltcorn/data/db");
 const os = require("os");
 const fs = require("fs").promises;
+const node_path = require("path");
 
 const { file } = require("tmp-promise");
 
@@ -86,7 +88,7 @@ module.exports = {
               name: "code",
               label: "Code",
               sublabel:
-                "Row is <code>ROW_VARNAME</code> variable names. If row is <code>{age:35}</code> then <code>ROW_AGE=35</code>. Use shebang for shell other than bash.",
+                "Row is <code>ROW_VARNAME</code> variable names. If row is <code>{age:35}</code> then <code>ROW_AGE=35</code>. Use shebang for shell other than bash. Also set: SC_FILESTORE_PATH, SC_USER_ID, SC_USER_ROLE",
               input_type: "code",
               attributes: { mode: "text/x-sh" },
             },
@@ -135,6 +137,11 @@ module.exports = {
           rowEnv[`SC_USER_ID`] = u.id;
           rowEnv[`SC_USER_ROLE`] = u.role_id;
         }
+        rowEnv.SC_FILESTORE_PATH = node_path.join(
+          db.connectObj.file_store,
+          db.getTenantSchema()
+        );
+        
         const { fd, path, cleanup } = await file();
         await fs.writeFile(path, code_to_run);
         let cmd = "bash";
