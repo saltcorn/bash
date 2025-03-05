@@ -10,6 +10,7 @@ const { file } = require("tmp-promise");
 
 module.exports = {
   sc_plugin_api_version: 1,
+  plugin_name: "bash",
   actions: {
     run_bash_script: {
       namespace: "Code",
@@ -43,6 +44,10 @@ module.exports = {
               label: "Script",
               input_type: "code",
               attributes: { mode: "text/x-sh" },
+              help: {
+                topic: "Shell code",
+                plugin: "bash",
+              },
               sublabel:
                 "Row is <code>ROW_VARNAME</code>. If row is <code>{age:35}</code> then <code>ROW_AGE=35</code>. Use shebang for shell other than bash.",
               showIf: { script_source: "Fixed" },
@@ -90,6 +95,10 @@ module.exports = {
               sublabel:
                 "Row is <code>ROW_VARNAME</code> variable names. If row is <code>{age:35}</code> then <code>ROW_AGE=35</code>. Use shebang for shell other than bash. Also set: SC_FILESTORE_PATH, SC_USER_ID, SC_USER_ROLE",
               input_type: "code",
+              help: {
+                topic: "Shell code",
+                plugin: "bash",
+              },
               attributes: { mode: "text/x-sh" },
             },
             ...commonFields,
@@ -141,7 +150,7 @@ module.exports = {
           db.connectObj.file_store,
           db.getTenantSchema()
         );
-        
+
         const { fd, path, cleanup } = await file();
         await fs.writeFile(path, code_to_run);
         let cmd = "bash";

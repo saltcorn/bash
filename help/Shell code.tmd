@@ -1,0 +1,8 @@
+The `run_bash_script` action allows you to run shell code. It used to be 
+restricted to bash scripts, but you can now use any shell interpreter 
+(including Python).
+
+### Setting the shell interpreter
+
+If you want to use a different shell interpreter than `bash`, you can set 
+the first line to a [shebang](https://en.wikipedia.org/wiki/Shebang_(Unix))
