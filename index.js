@@ -14,11 +14,11 @@ module.exports = {
   actions: {
     run_bash_script: {
       namespace: "Code",
-      configFields: async ({ table }) => {
+      configFields: async ({ table, __ = (s) => s }) => {
         const commonFields = [
           {
             name: "cwd",
-            label: "Working directory",
+            label: __("Working directory"),
             type: "String",
           },
         ];
