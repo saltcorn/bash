@@ -157,13 +157,18 @@ module.exports = {
         if (code_to_run.slice(0, 2) == "#!") {
           cmd = code_to_run.split("\n")[0].slice(2);
         }
-        const eres = await exec(`${cmd} ${path}`, {
-          cwd: cwd || os.homedir(),
-          env: {
-            ...process.env,
-            ...rowEnv,
-          },
-        });
+        let eres;
+        try {
+          eres = await exec(`${cmd} ${path}`, {
+            cwd: cwd || os.homedir(),
+            env: {
+              ...process.env,
+              ...rowEnv,
+            },
+          });
+        } catch (e) {
+          eres = e;
+        }
         await cleanup();
         if (table && row && (exitcode_field || stdout_field || stderr_field)) {
           const upd = {};
