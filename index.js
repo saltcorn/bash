@@ -159,6 +159,8 @@ module.exports = {
         }
         let eres;
         try {
+          console.log(`${cmd} ${path}`);
+
           eres = await exec(`${cmd} ${path}`, {
             cwd: cwd || os.homedir(),
             env: {
