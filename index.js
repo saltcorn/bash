@@ -167,8 +167,10 @@ module.exports = {
             },
           });
         } catch (e) {
+          console.error(e);
           eres = e;
         }
+        if (eres.stderr) console.error(eres.stderr);
         await cleanup();
         if (table && row && (exitcode_field || stdout_field || stderr_field)) {
           const upd = {};
