@@ -159,7 +159,7 @@ module.exports = {
         }
         let eres;
         try {
-          console.log(`${cmd} ${path}`, rowEnv);
+          //console.log(`${cmd} ${path}`, rowEnv);
 
           eres = await exec(`${cmd} ${path}`, {
             cwd: cwd || os.homedir(),
@@ -173,8 +173,8 @@ module.exports = {
           eres = e;
         }
         if (eres.stderr) console.error("err", eres.stderr);
-        if (eres.stdout) console.log("out ", eres.stdout);
-        if (eres.stdout) console.log("code ", eres.code);
+        //if (eres.stdout) console.log("out ", eres.stdout);
+        //if (eres.stdout) console.log("code ", eres.code);
         await cleanup();
         if (table && row && (exitcode_field || stdout_field || stderr_field)) {
           const upd = {};
