@@ -11,6 +11,9 @@ const { file } = require("tmp-promise");
 module.exports = {
   sc_plugin_api_version: 1,
   plugin_name: "bash",
+  exchange: {
+    agent_skills: [require("./agent-skill.js")],
+  },
   actions: {
     run_bash_script: {
       namespace: "Code",
@@ -148,7 +151,7 @@ module.exports = {
         }
         rowEnv.SC_FILESTORE_PATH = node_path.join(
           db.connectObj.file_store,
-          db.getTenantSchema()
+          db.getTenantSchema(),
         );
 
         const { fd, path, cleanup } = await file();
