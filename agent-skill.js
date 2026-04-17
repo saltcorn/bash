@@ -1,15 +1,4 @@
-const { div, pre, a } = require("@saltcorn/markup/tags");
-const Workflow = require("@saltcorn/data/models/workflow");
-const Form = require("@saltcorn/data/models/form");
-const Table = require("@saltcorn/data/models/table");
-const View = require("@saltcorn/data/models/view");
-const Trigger = require("@saltcorn/data/models/trigger");
-const FieldRepeat = require("@saltcorn/data/models/fieldrepeat");
-const { getState } = require("@saltcorn/data/db/state");
-const db = require("@saltcorn/data/db");
-const { eval_expression } = require("@saltcorn/data/models/expression");
-const { interpolate } = require("@saltcorn/data/utils");
-const { features } = require("@saltcorn/data/db/state");
+const { div, pre, a, code } = require("@saltcorn/markup/tags");
 const { spawn } = require("child_process");
 //const { fieldProperties } = require("./helpers");
 
@@ -32,7 +21,7 @@ you specify the command you would like to run, optionally with an SSH host to ru
   }
 
   static async configFields() {
-    return [];
+    return [{ name: "show_cmd", label: "Show command", type: "Bool" }];
   }
   async run_script(command, ssh_host, ssh_user, ssh_port) {
     return new Promise((resolve, reject) => {
@@ -79,7 +68,7 @@ you specify the command you would like to run, optionally with an SSH host to ru
       });
     });
   }
-  provideTools = () => {
+  provideTools() {
     return {
       type: "function",
       process: async (row, { req }) => {
@@ -90,9 +79,9 @@ you specify the command you would like to run, optionally with an SSH host to ru
           row.ssh_port,
         );
       },
-      /*renderToolCall({ phrase }, { req }) {
-        return div({ class: "border border-primary p-2 m-2" }, phrase);
-      },*/
+      renderToolCall: ({ command }, { req }) => {
+        if (this.show_cmd) return pre(code(command));
+      },
       renderToolResponse: this.display_result
         ? async (response, { req }) => {
             return div({ class: "border border-success p-2 m-2" }, response);
@@ -126,7 +115,7 @@ you specify the command you would like to run, optionally with an SSH host to ru
         },
       },
     };
-  };
+  }
 }
 
 module.exports = BashSkill;
