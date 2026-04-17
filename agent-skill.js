@@ -3,7 +3,7 @@ const { spawn } = require("child_process");
 //const { fieldProperties } = require("./helpers");
 
 class BashSkill {
-  static skill_name = "Bash";
+  static skill_name = "Run Bash command";
 
   get skill_label() {
     return "Bash";
