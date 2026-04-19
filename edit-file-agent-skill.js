@@ -129,113 +129,50 @@ function formatHunk(editSlice) {
 }
 
 /**
- * Simple O(ND) Myers diff returning an edit script with line numbers.
+ * Diff via longest-common-subsequence (DP).
+ * Correct for all inputs; O(N*M) time, fine for typical source files.
+ * Falls back to simpleDiff for very large files to cap memory.
  */
 function myersDiff(oldLines, newLines) {
   const N = oldLines.length;
   const M = newLines.length;
-  const MAX = N + M;
 
-  // For very large files, fall back to a simple approach to avoid
-  // excessive memory / time.
-  if (MAX > 50000) {
+  if (N + M > 50000) {
     return simpleDiff(oldLines, newLines);
   }
 
-  const V = new Map();
-  V.set(1, 0);
-  const trace = [];
-
-  outer: for (let d = 0; d <= MAX; d++) {
-    const vSnap = new Map(V);
-    trace.push(vSnap);
-    for (let k = -d; k <= d; k += 2) {
-      let x;
-      if (k === -d || (k !== d && (V.get(k - 1) || 0) < (V.get(k + 1) || 0))) {
-        x = V.get(k + 1) || 0;
+  // Build LCS length table.
+  // dp[i][j] = LCS length of oldLines[0..i-1] vs newLines[0..j-1]
+  const dp = Array.from({ length: N + 1 }, () => new Int32Array(M + 1));
+  for (let i = 1; i <= N; i++) {
+    for (let j = 1; j <= M; j++) {
+      if (oldLines[i - 1] === newLines[j - 1]) {
+        dp[i][j] = dp[i - 1][j - 1] + 1;
       } else {
-        x = (V.get(k - 1) || 0) + 1;
+        dp[i][j] = dp[i - 1][j] > dp[i][j - 1] ? dp[i - 1][j] : dp[i][j - 1];
       }
-      let y = x - k;
-      while (x < N && y < M && oldLines[x] === newLines[y]) {
-        x++;
-        y++;
-      }
-      V.set(k, x);
-      if (x >= N && y >= M) break outer;
     }
   }
 
-  // Backtrack to recover the edit script.
-  let x = N,
-    y = M;
+  // Backtrack to produce the edit script.
   const edits = [];
-
-  for (let d = trace.length - 1; d > 0; d--) {
-    const vPrev = trace[d - 1];
-    const k = x - y;
-    let prevK;
-    if (
-      k === -d ||
-      (k !== d && (vPrev.get(k - 1) || 0) < (vPrev.get(k + 1) || 0))
-    ) {
-      prevK = k + 1;
+  let i = N, j = M;
+  while (i > 0 || j > 0) {
+    if (i > 0 && j > 0 && oldLines[i - 1] === newLines[j - 1]) {
+      edits.push({ type: '=', line: oldLines[i - 1], oldLineNo: i, newLineNo: j });
+      i--; j--;
+    } else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) {
+      edits.push({ type: '+', line: newLines[j - 1], oldLineNo: i + 1, newLineNo: j });
+      j--;
     } else {
-      prevK = k - 1;
+      edits.push({ type: '-', line: oldLines[i - 1], oldLineNo: i, newLineNo: j + 1 });
+      i--;
     }
-    let prevX = vPrev.get(prevK) || 0;
-    let prevY = prevX - prevK;
-
-    // Diagonal (equal lines)
-    while (x > prevX && y > prevY) {
-      x--;
-      y--;
-      edits.push({
-        type: "=",
-        line: oldLines[x],
-        oldLineNo: x + 1,
-        newLineNo: y + 1,
-      });
-    }
-
-    if (d > 0) {
-      if (x === prevX) {
-        // Insertion
-        y--;
-        edits.push({
-          type: "+",
-          line: newLines[y],
-          oldLineNo: x + 1,
-          newLineNo: y + 1,
-        });
-      } else {
-        // Deletion
-        x--;
-        edits.push({
-          type: "-",
-          line: oldLines[x],
-          oldLineNo: x + 1,
-          newLineNo: y + 1,
-        });
-      }
-    }
-  }
-  // Handle remaining diagonal at d=0
-  while (x > 0 && y > 0) {
-    x--;
-    y--;
-    edits.push({
-      type: "=",
-      line: oldLines[x],
-      oldLineNo: x + 1,
-      newLineNo: y + 1,
-    });
   }
 
   edits.reverse();
   return edits;
 }
-
 /**
  * Fallback simple diff for very large files: find the changed region
  * by scanning from both ends, then emit = / - / + blocks.
