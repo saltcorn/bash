@@ -12,7 +12,10 @@ module.exports = {
   sc_plugin_api_version: 1,
   plugin_name: "bash",
   exchange: {
-    agent_skills: [require("./run-bash-agent-skill.js")],
+    agent_skills: [
+      require("./run-bash-agent-skill.js"),
+      require("./edit-file-agent-skill.js"),
+    ],
   },
   actions: {
     run_bash_script: {
