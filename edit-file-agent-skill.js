@@ -405,7 +405,7 @@ the file that must match uniquely, and the new string to replace this with. Opti
     return {
       type: "function",
       process: async (row, { req }) => {
-        return await this.edit_file(
+        const result = await this.edit_file(
           row.filepath,
           row.old_str,
           row.new_str,
@@ -413,18 +413,16 @@ the file that must match uniquely, and the new string to replace this with. Opti
           row.ssh_user,
           row.ssh_port,
         );
+        return result;
       },
-      renderToolCall: ({ command }, { req }) => {
-        if (this.show_cmd) return pre(code(command));
-      },
-      renderToolResponse: this.display_result
+      renderToolResponse: this.show_edit
         ? async (response, { req }) => {
-            return div({ class: "border border-success p-2 m-2" }, response);
+            return pre(response);
           }
         : undefined,
       function: {
-        name: "run_bash",
-        description: "Run a bash command, returning the stdout and stderr",
+        name: "edit_tool",
+        description: "Edit a file on the local or remote (via SSH) filesystem",
         parameters: {
           type: "object",
           required: ["command"],
@@ -439,8 +437,7 @@ the file that must match uniquely, and the new string to replace this with. Opti
               type: "string",
             },
             new_str: {
-              description:
-                "The string to replace old_str with",
+              description: "The string to replace old_str with",
               type: "string",
             },
             ssh_host: {
