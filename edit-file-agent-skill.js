@@ -405,8 +405,10 @@ the file that must match uniquely, and the new string to replace this with. Opti
     return {
       type: "function",
       process: async (row, { req }) => {
-        return await this.run_script(
-          row.command,
+        return await this.edit_file(
+          row.filepath,
+          row.old_str,
+          row.new_str,
           row.ssh_host,
           row.ssh_user,
           row.ssh_port,
@@ -427,13 +429,23 @@ the file that must match uniquely, and the new string to replace this with. Opti
           type: "object",
           required: ["command"],
           properties: {
-            command: {
-              description: "The bash command to run",
+            filepath: {
+              description: "The absolute path to the file to edit",
+              type: "string",
+            },
+            old_str: {
+              description:
+                "A string existing uniquely in the file, whcih will be replaced",
+              type: "string",
+            },
+            new_str: {
+              description:
+                "The string to replace old_str with",
               type: "string",
             },
             ssh_host: {
               description:
-                "the remote SSH host to run this on. Only the machine name, not user. Run local if not supplied",
+                "the remote SSH host to edit the file on. Only the machine name, not user. Edit locally if not supplied",
               type: "string",
             },
             ssh_user: {
