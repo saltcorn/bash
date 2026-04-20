@@ -1,4 +1,4 @@
-const { div, pre, a, code } = require("@saltcorn/markup/tags");
+const { div, pre, a, code, span } = require("@saltcorn/markup/tags");
 const { spawn } = require("child_process");
 //const { fieldProperties } = require("./helpers");
 
@@ -79,14 +79,17 @@ you specify the command you would like to run, optionally with an SSH host to ru
           row.ssh_port,
         );
       },
-      renderToolCall: ({ command }, { req }) => {
-        if (this.show_cmd) return pre(code(command));
+      renderToolCall: ({ command, ssh_host, ssh_user }, { req }) => {
+        if (this.show_cmd)
+          return (
+            (ssh_host
+              ? div(span(
+                  { class: "badge text-bg-secondary" },
+                  (ssh_user ? `${ssh_user}@` : "") + ssh_host,
+                ))
+              : "") + code(command)
+          );
       },
-      renderToolResponse: this.display_result
-        ? async (response, { req }) => {
-            return div({ class: "border border-success p-2 m-2" }, response);
-          }
-        : undefined,
       function: {
         name: "run_bash",
         description: "Run a bash command, returning the stdout and stderr",
