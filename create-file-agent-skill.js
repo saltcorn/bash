@@ -1,4 +1,12 @@
-const { div, pre, a, code } = require("@saltcorn/markup/tags");
+const {
+  div,
+  pre,
+  a,
+  code,
+  p,
+  details,
+  summary,
+} = require("@saltcorn/markup/tags");
 const { escapeHtml } = require("@saltcorn/data/utils");
 const { spawn } = require("child_process");
 const fs = require("fs").promises;
@@ -96,14 +104,20 @@ with the file contents. Optionally also specify the SSH host to create the file 
         );
         return result;
       },
-      renderToolResponse: this.show_edit
-        ? async (response, { req }) => {
-            return pre(escapeHtml(response));
+      renderToolResponse: this.show_file
+        ? async (response, { req, tool_call }) => {
+            if (tool_call?.input?.contents) {
+              return details(
+                summary(escapeHtml(response)),
+                pre(escapeHtml(tool_call.input.contents)),
+              );
+            } else return p(escapeHtml(response));
           }
         : undefined,
       function: {
         name: "create_file",
-        description: "Create a file on the local or remote (via SSH) filesystem",
+        description:
+          "Create a file on the local or remote (via SSH) filesystem",
         parameters: {
           type: "object",
           required: ["filepath", "contents"],
@@ -111,7 +125,7 @@ with the file contents. Optionally also specify the SSH host to create the file 
             filepath: {
               description: "The absolute path to the file to edit",
               type: "string",
-            },           
+            },
             contents: {
               description: "The string with the file contents",
               type: "string",
