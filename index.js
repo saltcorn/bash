@@ -15,6 +15,7 @@ module.exports = {
     agent_skills: [
       require("./run-bash-agent-skill.js"),
       require("./edit-file-agent-skill.js"),
+      require("./create-file-agent-skill.js"),
     ],
   },
   actions: {
