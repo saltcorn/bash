@@ -1,5 +1,7 @@
 const { div, pre, a, code, span } = require("@saltcorn/markup/tags");
 const { spawn } = require("child_process");
+const { escapeHtml } = require("@saltcorn/data/utils");
+
 //const { fieldProperties } = require("./helpers");
 
 class BashSkill {
@@ -83,11 +85,13 @@ you specify the command you would like to run, optionally with an SSH host to ru
         if (this.show_cmd)
           return (
             (ssh_host
-              ? div(span(
-                  { class: "badge text-bg-secondary" },
-                  (ssh_user ? `${ssh_user}@` : "") + ssh_host,
-                ))
-              : "") + code(command)
+              ? div(
+                  span(
+                    { class: "badge text-bg-secondary" },
+                    (ssh_user ? `${ssh_user}@` : "") + ssh_host,
+                  ),
+                )
+              : "") + code(escapeHtml(command))
           );
       },
       function: {

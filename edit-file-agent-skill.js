@@ -1,4 +1,5 @@
 const { div, pre, a, code } = require("@saltcorn/markup/tags");
+const { escapeHtml } = require("@saltcorn/data/utils");
 const { execSync } = require("child_process");
 const fs = require("fs");
 const path = require("path");
@@ -156,16 +157,33 @@ function myersDiff(oldLines, newLines) {
 
   // Backtrack to produce the edit script.
   const edits = [];
-  let i = N, j = M;
+  let i = N,
+    j = M;
   while (i > 0 || j > 0) {
     if (i > 0 && j > 0 && oldLines[i - 1] === newLines[j - 1]) {
-      edits.push({ type: '=', line: oldLines[i - 1], oldLineNo: i, newLineNo: j });
-      i--; j--;
+      edits.push({
+        type: "=",
+        line: oldLines[i - 1],
+        oldLineNo: i,
+        newLineNo: j,
+      });
+      i--;
+      j--;
     } else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) {
-      edits.push({ type: '+', line: newLines[j - 1], oldLineNo: i + 1, newLineNo: j });
+      edits.push({
+        type: "+",
+        line: newLines[j - 1],
+        oldLineNo: i + 1,
+        newLineNo: j,
+      });
       j--;
     } else {
-      edits.push({ type: '-', line: oldLines[i - 1], oldLineNo: i, newLineNo: j + 1 });
+      edits.push({
+        type: "-",
+        line: oldLines[i - 1],
+        oldLineNo: i,
+        newLineNo: j + 1,
+      });
       i--;
     }
   }
@@ -354,7 +372,7 @@ the file that must match uniquely, and the new string to replace this with. Opti
       },
       renderToolResponse: this.show_edit
         ? async (response, { req }) => {
-            return pre(response);
+            return pre(escapeHtml(response));
           }
         : undefined,
       function: {
