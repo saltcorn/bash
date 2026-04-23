@@ -271,7 +271,7 @@ class EditFileSkill {
 
   async systemPrompt({ triggering_row, user }) {
     return `If you would like to edit a file on the local or on a remote (via SSH) filesystemrun a shell command, use the edit_file tool. 
-Passwordless SSH access may be enabled on hosts the user specifies. in the edit_file too, specify the absolute path the file, a string in 
+Passwordless SSH access may be enabled on hosts the user specifies. in the edit_file tool, specify the absolute path the file, a string in 
 the file that must match uniquely, and the new string to replace this with. Optionally also specify the SSH host to edit the file on.`;
   }
 
@@ -376,11 +376,11 @@ the file that must match uniquely, and the new string to replace this with. Opti
           }
         : undefined,
       function: {
-        name: "edit_tool",
+        name: "edit_file",
         description: "Edit a file on the local or remote (via SSH) filesystem",
         parameters: {
           type: "object",
-          required: ["command"],
+          required: ["filepath", "old_str", "new_str"],
           properties: {
             filepath: {
               description: "The absolute path to the file to edit",
