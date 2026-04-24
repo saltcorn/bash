@@ -40,11 +40,14 @@ with the file contents. Optionally also specify the SSH host to create the file 
     if (typeof contents !== "string") {
       return Error("Error: contents must be a string");
     }
-
-    // Local case
-    if (!sshHost) {
-      await fs.writeFile(filepath, contents);
-      return `File ${filepath} created`;
+    try {
+      // Local case
+      if (!sshHost) {
+        await fs.writeFile(filepath, contents);
+        return `File ${filepath} created`;
+      }
+    } catch (e) {
+      return `Error: ${e.message}`;
     }
 
     // Remote case: stream contents to `cat > filepath` over SSH.
@@ -106,7 +109,7 @@ with the file contents. Optionally also specify the SSH host to create the file 
       },
       renderToolResponse: this.show_file
         ? async (response, { req, tool_call }) => {
-            if (tool_call?.input?.contents) {
+            if (tool_call?.input?.contents && !response.startsWith("Error:")) {
               return details(
                 summary(escapeHtml(response)),
                 pre(escapeHtml(tool_call.input.contents)),
