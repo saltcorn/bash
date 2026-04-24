@@ -65,31 +65,36 @@ with the file contents. Optionally also specify the SSH host to create the file 
     // Single-quote the remote filepath and escape any embedded single quotes.
     const quotedPath = `'${filepath.replace(/'/g, `'\\''`)}'`;
     sshArgs.push(`cat > ${quotedPath}`);
+    try {
+      await new Promise((resolve, reject) => {
+        const child = spawn("ssh", sshArgs, {
+          stdio: ["pipe", "pipe", "pipe"],
+        });
 
-    await new Promise((resolve, reject) => {
-      const child = spawn("ssh", sshArgs, { stdio: ["pipe", "pipe", "pipe"] });
+        let stderr = "";
+        child.stderr.on("data", (chunk) => {
+          stderr += chunk.toString();
+        });
 
-      let stderr = "";
-      child.stderr.on("data", (chunk) => {
-        stderr += chunk.toString();
+        child.on("error", reject);
+        child.on("close", (code) => {
+          if (code === 0) {
+            resolve();
+          } else {
+            reject(
+              new Error(
+                `ssh exited with code ${code}${stderr ? `: ${stderr.trim()}` : ""}`,
+              ),
+            );
+          }
+        });
+
+        child.stdin.on("error", reject);
+        child.stdin.end(contents);
       });
-
-      child.on("error", reject);
-      child.on("close", (code) => {
-        if (code === 0) {
-          resolve();
-        } else {
-          reject(
-            new Error(
-              `ssh exited with code ${code}${stderr ? `: ${stderr.trim()}` : ""}`,
-            ),
-          );
-        }
-      });
-
-      child.stdin.on("error", reject);
-      child.stdin.end(contents);
-    });
+    } catch (e) {
+      return `Error: ${e.message}`;
+    }
 
     return `File ${filepath} on ${sshHost} created`;
   }
