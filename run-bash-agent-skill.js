@@ -36,6 +36,10 @@ you specify the command you would like to run, optionally with an SSH host to ru
       if (ssh_host) {
         const args = ["-o", "BatchMode=yes"];
 
+        if (this.timeout) {
+          args.push("-o", `ConnectTimeout=${Math.ceil(this.timeout)}`);
+        }
+
         if (ssh_port) {
           args.push("-p", ssh_port.toString());
         }
