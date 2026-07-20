@@ -23,7 +23,10 @@ you specify the command you would like to run, optionally with an SSH host to ru
   }
 
   static async configFields() {
-    return [{ name: "show_cmd", label: "Show command", type: "Bool" }];
+    return [
+      { name: "show_cmd", label: "Show command", type: "Bool" },
+      { name: "timeout", label: "Timeout (s)", type: "Integer" },
+    ];
   }
   async run_script(command, ssh_host, ssh_user, ssh_port) {
     return new Promise((resolve, reject) => {
@@ -53,6 +56,16 @@ you specify the command you would like to run, optionally with an SSH host to ru
         proc.stdin.end();
       }
 
+      let timer;
+      let timedOut = false;
+      if (this.timeout) {
+        timer = setTimeout(() => {
+          timedOut = true;
+          proc.kill("SIGKILL");
+          reject({ error: "Timeout" });
+        }, this.timeout * 1000);
+      }
+
       proc.stdout.on("data", (data) => {
         output += data.toString();
       });
@@ -62,10 +75,14 @@ you specify the command you would like to run, optionally with an SSH host to ru
       });
 
       proc.on("error", (err) => {
+        if (timedOut) return;
+        if (timer) clearTimeout(timer);
         reject(err);
       });
 
       proc.on("close", () => {
+        if (timedOut) return;
+        if (timer) clearTimeout(timer);
         resolve(output);
       });
     });
